@@ -1,0 +1,31 @@
+name: Auto Commit
+
+on:
+  schedule:
+    - cron: '0 22 * * *' # Set cron interval to run the action every hour
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name 'fhasnurr'
+          git config --global user.email 'fandi.hasnur10@gmail.com'
+
+      - name: Make changes and commit
+        run: |
+          sh auto-commit.sh
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          GIT_SSH_COMMAND: 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${{ secrets.SSH_PRIVATE_KEY }}'
+
+      - name: Push changes to repository
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
